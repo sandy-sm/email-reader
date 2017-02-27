@@ -1,0 +1,7 @@
+Kafka-Console-Consumer command to watch incoming message:-
+
+
+> kafka-directory/bin/kafka-console-consumer.sh --zookeeper localhost:3191 --topic email-list --from-beginning
+
+
+

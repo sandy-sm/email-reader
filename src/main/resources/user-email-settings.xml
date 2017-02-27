@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<emails>
+    <email id="dange.sandip@gmail.com" host="imap.googlemail.com" port="993" pass="yourpassword"  />
+    <email id="sandeep@k2-inc.com" host="outlook.office365.com" port="993" pass="sandeepatktwo"  />-->
+</emails>
