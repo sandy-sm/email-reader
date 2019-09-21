@@ -36,38 +36,54 @@ public class IMAPMailReader implements MailReader {
     Session session = Session.getDefaultInstance(properties);
     try {
       logger.info("Fetching Email Store.. for : {}", email);
-      Store store = session.getStore("imaps");
-      store.connect(email.getHost(), email.getId(), email.getPass());
+      Store store = getStore(session);
 
       logger.info("Fetching Email INBOX Folder : {}", email);
-      //create the folder object and open it
-      Folder emailFolder = store.getFolder("INBOX");
-      emailFolder.open(Folder.READ_ONLY);
+      Folder emailFolder = getFolder(store);
 
-      // retrieve the messages from the folder in an array and print it
       Message[] messages = emailFolder.getMessages();
-      System.out.println("messages.length---" + messages.length);
-      logger.info("Got Messages Length: {}, for User: {}", messages.length, email.getId());
+      logger.info("Got Messages of Size: {}, for User: {}", messages.length, email.getId());
 
-      for (int i = 0, n = messages.length; i < n; i++) {
-        Message message = messages[i];
-        System.out.println("---------------------------------");
-        System.out.println("Email Number " + (i + 1));
-        System.out.println("Subject: " + message.getSubject());
-        System.out.println("From: " + message.getFrom()[0]);
-        simpleKafkaProducer.produceMessage(email, message);
-      }
+      logger.info("Now posting messages");
+      postMessages(messages);
+      logger.info("Done posting messages");
 
-      //close the store and folder objects
       emailFolder.close(false);
+      logger.info("Closed Email Folder");
+
       store.close();
-    }catch (NoSuchProviderException e) {
+      logger.info("Closed Store");
+    } catch (NoSuchProviderException e) {
       logger.error("No Such Provider Error, Details: ", e);
     } catch (MessagingException e) {
       logger.error("Messaging Error, Details: ", e);
     } catch (Exception e) {
       logger.error("Error Occured: ", e);
     }
+  }
+
+  private void postMessages(Message[] messages) throws MessagingException {
+    for (int index = 0, n = messages.length; index < n; index++) {
+      Message message = messages[index];
+      logger.debug("---------------------------------");
+      logger.debug("Email Number {}", (index + 1));
+      logger.debug("Subject: {}", message.getSubject());
+      logger.debug("From: {}", message.getFrom()[0]);
+
+      simpleKafkaProducer.produceMessage(email, message);
+    }
+  }
+
+  private Folder getFolder(Store store) throws MessagingException {
+    Folder emailFolder = store.getFolder("INBOX");
+    emailFolder.open(Folder.READ_ONLY);
+    return emailFolder;
+  }
+
+  private Store getStore(Session session) throws MessagingException {
+    Store store = session.getStore("imaps");
+    store.connect(email.getHost(), email.getId(), email.getPass());
+    return store;
   }
 
   public void run() {

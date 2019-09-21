@@ -1,3 +1,6 @@
+/**
+ * Copyright @ Sandeep Dange
+ */
 package com.sandeep.emailreader.kafka;
 
 import com.sandeep.emailreader.reader.message.EmailMessage;
@@ -13,10 +16,11 @@ import javax.mail.MessagingException;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.Properties;
 
 /**
+ * A Simple Kafka producer which enqueue(s) Messages to a topic
+ *
  * Created by sandeep on 21/2/17.
  */
 public class SimpleKafkaProducer {
@@ -36,6 +40,16 @@ public class SimpleKafkaProducer {
     } catch (IOException ioException) {
       logger.error("Error loading config properties due to ", ioException);
     }
+
+    initializeKafkaProperties(applicationProperties);
+  }
+
+  /**
+   * Initializes Kafka Properties
+   *
+   * @param applicationProperties
+   */
+  private void initializeKafkaProperties(Properties applicationProperties) {
     kafkProperties.put("emailKafkaTopic", applicationProperties.getProperty("kafka_email_publish_topic"));
     kafkProperties.put("bootstrap.servers", applicationProperties.getProperty("kafka_brokers"));
     kafkProperties.put("acks", "all");
@@ -47,21 +61,37 @@ public class SimpleKafkaProducer {
     kafkProperties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
   }
 
+  /**
+   * Produce(s) Message to Kafka Queue
+   *
+   * @param email
+   * @param message
+   */
   public void produceMessage(EmailXmlPojo.Email email, Message message) {
     logger.info("Producing Kafka Email Message {}, of User:{}", message, email.getHost());
     logger.info("With Properties: {}", kafkProperties);
     Producer<String, String> producer = new KafkaProducer<String, String>(kafkProperties);
 
-    EmailMessage emailMessage = new EmailMessage();
-    try {
-      emailMessage.getEmailMessage(message);
-    } catch (MessagingException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    EmailMessage emailMessage = getEmailMessage(message);
+
     ProducerRecord producerRecord = new ProducerRecord(kafkProperties.getProperty("emailKafkaTopic"), email.getId(), emailMessage.toString());
     producer.send(producerRecord);
+  }
+
+  /**
+   * Get(s) {@link EmailMessage} from {@link Message}
+   *
+   * @param message
+   * @return
+   */
+  private EmailMessage getEmailMessage(Message message) {
+    EmailMessage emailMessage = new EmailMessage();
+    try {
+      emailMessage.initialize(message);
+    } catch (MessagingException e) {
+      e.printStackTrace();
+    }
+    return emailMessage;
   }
 
 }

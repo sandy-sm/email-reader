@@ -1,18 +1,15 @@
+/**
+ * Copyright @ Sandeep Dange
+ */
 package com.sandeep.emailreader.reader.message;
 
-import javax.activation.DataHandler;
-import javax.mail.Address;
-import javax.mail.Flags;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.Multipart;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Date;
-import java.util.Enumeration;
 
 /**
+ * Representational Object of EmailMessage received
+ *
  * Created by sandeep on 27/2/17.
  */
 public class EmailMessage {
@@ -23,11 +20,31 @@ public class EmailMessage {
   private String subjectLine;
   private String content;
 
-  public void getEmailMessage(Message message) throws MessagingException, IOException {
+  /**
+   * Initializes {@link EmailMessage} from {@link Message}
+   *
+   * @param message
+   * @throws MessagingException
+   * @throws IOException
+   */
+  public void initialize(Message message) throws MessagingException {
     this.setToEmailAddresses(message.getFrom().toString());
     this.setCcEmailAddresses(message.getAllRecipients().toString());
     this.setSubjectLine(message.getSubject());
     //this.setContent((String)message.getContent());
+  }
+
+  /**
+   * Initializes {@link EmailMessage} from parameters
+   *
+   * @param fromAddress
+   * @param subject
+   * @param recipients
+   */
+  public void initialize(String fromAddress, String subject, String recipients) {
+    this.setToEmailAddresses(fromAddress);
+    this.setCcEmailAddresses(recipients);
+    this.setSubjectLine(subject);
   }
 
   public String getFromEmailAddress() {
@@ -70,7 +87,8 @@ public class EmailMessage {
     this.content = content;
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return "EmailMessage{" +
         "fromEmailAddress='" + fromEmailAddress + '\'' +
         ", toEmailAddresses='" + toEmailAddresses + '\'' +

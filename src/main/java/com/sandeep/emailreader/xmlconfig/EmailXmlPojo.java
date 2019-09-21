@@ -1,3 +1,6 @@
+/**
+ * Copyright @ Sandeep Dange
+ */
 package com.sandeep.emailreader.xmlconfig;
 
 import org.slf4j.Logger;
@@ -9,23 +12,25 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
+ * Representational Object of Email XML Entries
+ *
  * Created by sandeep on 22/2/17.
  */
 @XmlRootElement(name = "emails")
 public class EmailXmlPojo {
 
-  static Logger logger = LoggerFactory.getLogger(EmailXmlPojo.class);
+  private static Logger logger = LoggerFactory.getLogger(EmailXmlPojo.class);
+
+  private static String CONFIG_FILE = "src/main/resources/user-email-settings.xml";
 
   @XmlElement(name = "email")
   List<Email> emailList;
 
   public static List<Email> readConfig() {
-    File file = new File("src/main/resources/user-email-settings.xml");
+    File file = new File(CONFIG_FILE);
     EmailXmlPojo email = null;
 
     try {
@@ -39,6 +44,9 @@ public class EmailXmlPojo {
     return email.emailList;
   }
 
+  /**
+   * Email POJO
+   */
   public static class Email {
     String id;
     String host;
